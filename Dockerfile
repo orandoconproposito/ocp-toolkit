@@ -43,8 +43,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgnutls28-dev \
     libaom-dev \
     libdav1d-dev \
-    librav1e-dev \
-    libsvtav1-dev \
     libzimg-dev \
     libwebp-dev \
     git \
@@ -54,6 +52,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libtool \
     libfribidi-dev \
     libharfbuzz-dev \
+    python3-venv \
     && rm -rf /var/lib/apt/lists/*
 
 # --- INSTALACIÓN DE NODE.JS (PARA TEXT-ANIMATE-KIT Y N8N) ---
@@ -63,6 +62,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
 
 # --- CONFIGURACIÓN DEL WORKSPACE ---
 WORKDIR /workspace
+
+# --- CREAR Y ACTIVAR VIRTUAL ENVIRONMENT ---
+RUN python3 -m venv /workspace/venv
+ENV PATH="/workspace/venv/bin:$PATH"
+ENV VIRTUAL_ENV="/workspace/venv"
 
 # --- INSTALACIÓN DE TEXT-ANIMATE-KIT ---
 # Copiar solo package.json primero para aprovechar el cache de Docker
@@ -78,6 +82,8 @@ RUN npm install -g n8n
 WORKDIR /workspace/nca-toolkit
 # Copiar solo requirements.txt primero para aprovechar el cache
 COPY nca-toolkit/requirements.txt .
+
+# VIRTUAL ENV FIX: Install packages in virtual environment
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
